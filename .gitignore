@@ -1,0 +1,8 @@
+debug
+build
+Win32
+bin
+.vscode/
+.idea/
+*.exe
+.idea
