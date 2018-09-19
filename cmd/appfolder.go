@@ -1,15 +1,14 @@
 package main
 
 import (
-	"os"
 	"github.com/lxn/win"
-	"syscall"
+	"os"
 	"path/filepath"
-	)
+	"syscall"
+)
 
 const (
 	appName = "ufo82"
-
 )
 
 func appFolderPath() string {
@@ -22,8 +21,8 @@ func appFolderPath() string {
 		appDataPath = syscall.UTF16ToString(buf[0:])
 	}
 	appDataPath = filepath.Join(appDataPath, "Аналитприбор", appName)
-	_,err := os.Stat(appDataPath)
-	if err != nil{
+	_, err := os.Stat(appDataPath)
+	if err != nil {
 		if os.IsNotExist(err) { // создать каталог если его нет
 			os.Mkdir(appDataPath, os.ModePerm)
 		} else {
@@ -36,5 +35,3 @@ func appFolderPath() string {
 func appFolderFileName(filename string) string {
 	return filepath.Join(appFolderPath(), filename)
 }
-
-

@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/fpawel/procmq"
+	"github.com/fpawel/ufo82/internal/hardware"
+	"github.com/fpawel/ufo82/internal/ufo82"
 	"net"
-	"github.com/fpawel/ufo82/hardware"
-	"github.com/fpawel/ufo82"
 )
 
 const (
@@ -23,7 +23,6 @@ const (
 	PeerStopHardware
 )
 
-
 type app struct {
 	pipe     procmq.ProcessMQ
 	hardware hardware.Provider
@@ -33,14 +32,14 @@ type app struct {
 
 func newApp(writerPipeConn net.Conn) *app {
 	x := new(app)
-	x.db = ufo82.MustConnectDB( appFolderFileName("products.db"))
+	x.db = ufo82.MustConnectDB(appFolderFileName("products.db"))
 	x.peer = newSyncSender(writerPipeConn, x.db)
 	x.hardware = hardware.NewProvider(x.peer, appFolderFileName("hardware.json"))
 	return x
 }
 
-func (x *app) Close() error{
-	fmt.Println("CLOSE HARDWARE:",x.hardware.Close())
+func (x *app) Close() error {
+	fmt.Println("CLOSE HARDWARE:", x.hardware.Close())
 	fmt.Println("CLOSE PEER:", x.peer.Close())
 	fmt.Println("CLOSE DATABASE:", x.db.Close())
 	return nil
@@ -124,7 +123,6 @@ func (x *app) Run(readerPipeConn net.Conn) error {
 				return err
 			}
 			x.hardware.SetPortName(portName)
-
 
 		case PeerPlaceChecked:
 			checked, err := pipe.ReadUInt32()

@@ -1,24 +1,23 @@
 package main
 
 import (
-	"github.com/fpawel/ufo82"
-	"github.com/fpawel/ufo82/hardware"
+	"github.com/fpawel/ufo82/internal/hardware"
+	"github.com/fpawel/ufo82/internal/ufo82"
 	"net"
 )
 
 type syncSender struct {
 	hardwareConnectionError chan string
-	done chan error
+	done                    chan error
 	interrupt,
 	years,
-
 
 	hardwareConnected,
 	hardwareDisconnected,
 	newParty chan bool
 	monthsOfYear                   chan int
-	partiesOfYearMonthDay             chan ufo82.YearMonthDay
-	daysOfYearMonth             chan ufo82.YearMonth
+	partiesOfYearMonthDay          chan ufo82.YearMonthDay
+	daysOfYearMonth                chan ufo82.YearMonth
 	productsOfParty                chan ufo82.PartyID
 	sensitivitiesOfProduct         chan ufo82.ProductID
 	applyCurrentProductOrderSerial chan ufo82.ProductOrderSerial
@@ -26,7 +25,7 @@ type syncSender struct {
 	infoMessage                    chan InfoMessage
 	hardwareConfig                 chan hardware.Config
 	hardwareCurrentPlace           chan int
-	comports chan []string
+	comports                       chan []string
 }
 
 func newSyncSender(writerPipeConn net.Conn, db ufo82.DB) (x syncSender) {
@@ -60,7 +59,6 @@ func newSyncSender(writerPipeConn net.Conn, db ufo82.DB) (x syncSender) {
 	x.hardwareCurrentPlace = make(chan int)
 
 	go x.run(sender)
-
 
 	return x
 }
@@ -140,8 +138,6 @@ func (x syncSender) run(senderMessages *sender) {
 	}()
 	var currentProducts []ufo82.Product
 
-
-
 	for {
 
 		select {
@@ -207,7 +203,7 @@ func (x syncSender) run(senderMessages *sender) {
 		case n := <-x.hardwareCurrentPlace:
 			senderMessages.HardwareCurrentPlace(n)
 
-		case ports := <- x.comports:
+		case ports := <-x.comports:
 			senderMessages.ComPorts(ports)
 
 		}

@@ -2,15 +2,14 @@ package ufo82
 
 import (
 	"time"
-
 )
 
 type PartyID int64
 type ProductID int64
 
 type Party struct {
-	PartyID   PartyID        `db:"party_id"`
-	CreatedAt time.Time      `db:"created_at"`
+	PartyID   PartyID   `db:"party_id"`
+	CreatedAt time.Time `db:"created_at"`
 }
 
 type Product struct {
@@ -21,8 +20,8 @@ type Product struct {
 }
 
 type Sensitivity struct {
-	StoredAt  time.Time   `db:"stored_at"`
-	Value     float64   `db:"value"`
+	StoredAt time.Time `db:"stored_at"`
+	Value    float64   `db:"value"`
 }
 
 type YearMonth struct {
@@ -36,8 +35,3 @@ type YearMonthDay struct {
 type ProductOrderSerial struct {
 	Order, Serial int
 }
-
-
-
-
-

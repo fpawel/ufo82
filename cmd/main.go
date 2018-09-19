@@ -1,11 +1,11 @@
 package main
 
 import (
-		"fmt"
-	"gopkg.in/natefinch/npipe.v2"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"gopkg.in/natefinch/npipe.v2"
 	"os/exec"
-	)
+)
 
 func main() {
 
@@ -22,7 +22,7 @@ func main() {
 	}
 	defer pipeWriteListener.Close()
 
-	if err := exec.Command(appFolderFileName( "ufo82.exe")).Start(); err != nil {
+	if err := exec.Command(appFolderFileName("ufo82.exe")).Start(); err != nil {
 		panic(err)
 	}
 

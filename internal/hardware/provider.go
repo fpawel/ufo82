@@ -4,12 +4,12 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/fpawel/guartutils/comport"
-	"github.com/fpawel/guartutils/modbus"
-	"math"
-	"github.com/tarm/serial"
-	"time"
-	"github.com/pkg/errors"
 	"github.com/fpawel/guartutils/fetch"
+	"github.com/fpawel/guartutils/modbus"
+	"github.com/pkg/errors"
+	"github.com/tarm/serial"
+	"math"
+	"time"
 )
 
 type Peer interface {
@@ -30,7 +30,7 @@ type Reading struct {
 }
 
 type Provider struct {
-	peer   Peer
+	peer                           Peer
 	chStart, chStop, chComportDone chan struct{}
 	comports,
 	interrupt, done chan bool
@@ -47,15 +47,14 @@ type pinChecked struct {
 }
 
 type pinCheckedR struct {
-	ch chan checkedR
-	pin     int
+	ch  chan checkedR
+	pin int
 }
 
 type checkedR struct {
 	checked    bool
 	hasChecked bool
 }
-
 
 func NewProvider(peer Peer, configFilename string) Provider {
 
@@ -70,9 +69,8 @@ func NewProvider(peer Peer, configFilename string) Provider {
 		done:                         make(chan bool),
 		interrupt:                    make(chan bool, 3),
 		chGetPinChecked:              make(chan pinCheckedR),
-		chChanInterruptComport:       make(chan chan struct{} ),
+		chChanInterruptComport:       make(chan chan struct{}),
 		chChanCurrentWorkInterrupted: make(chan chan bool),
-
 	}
 	go x.run(configFilename)
 	go comport.NotifyAvailablePortsChange(x.comports)
@@ -85,12 +83,8 @@ func (x Provider) getPinChecked(pin int) checkedR {
 	return <-ch
 }
 
-
-
-
-
 func (x Provider) runComPort(serialPortName string) {
-	defer func(){
+	defer func() {
 		x.chComportDone <- struct{}{}
 	}()
 
@@ -107,13 +101,13 @@ func (x Provider) runComPort(serialPortName string) {
 		},
 	})
 
-	if err := port.Open(x); err != nil {
+	if err := port.Open(); err != nil {
 		x.peer.HardwareConnectionError(err.Error())
 		return
 	}
 	x.peer.HardwareConnected()
 
-	defer func(){
+	defer func() {
 		x.peer.HardwareDisconnected()
 		if err := port.Close(); err != nil {
 			x.peer.HardwareConnectionError(err.Error())
@@ -151,7 +145,7 @@ func (x Provider) CurrentWorkInterrupted() bool {
 	return <-ch
 }
 
-func (x Provider) SubscribeInterrupted(ch chan struct{}, subscribe bool ) {
+func (x Provider) SubscribeInterrupted(ch chan struct{}, subscribe bool) {
 	if subscribe {
 		x.chChanInterruptComport <- ch
 	} else {
@@ -198,29 +192,28 @@ func (x Provider) run(configFilename string) {
 		x.done <- true
 	}()
 
-	var interruptComport chan struct {}
+	var interruptComport chan struct{}
 
 gotoSelect:
 	for {
 
 		select {
 
-		case ch := <- x.chChanCurrentWorkInterrupted:
+		case ch := <-x.chChanCurrentWorkInterrupted:
 			ch <- currentWorkInterrupted
 
 		case c := <-x.chGetPinChecked:
 
 			c.ch <- checkedR{
-				checked: cfg.CheckedPlaces[c.pin],
+				checked:    cfg.CheckedPlaces[c.pin],
 				hasChecked: cfg.CheckedPlaceExists(),
 			}
 
-		case ch := <- x.chChanInterruptComport:
+		case ch := <-x.chChanInterruptComport:
 			interruptComport = ch
 
-
 		case <-x.interrupt:
-			if started{
+			if started {
 				if interruptComport != nil {
 					interruptComport <- struct{}{}
 				}
@@ -281,22 +274,20 @@ gotoSelect:
 	}
 }
 
-
-
 func (x Provider) readPin(port *comport.Port, pin int) (reading Reading) {
 
 	reading.Pin = pin
 
-	addr := byte(17)
+	addr := modbus.Addr(17)
 	n := byte(pin)
 	if pin > 4 {
 		n -= 5
 		addr--
 	}
 	request := modbus.Request{
-		Addr: addr,
-		Cmd:  3,
-		Data: append([]byte{0, 6*n + 2, 0, 1}),
+		Addr:                addr,
+		ProtocolCommandCode: 3,
+		Data:                append([]byte{0, 6*n + 2, 0, 1}),
 	}
 	bytes, err := port.Fetch(request.Bytes())
 	if err != nil {
@@ -317,12 +308,12 @@ func (x Provider) readPin(port *comport.Port, pin int) (reading Reading) {
 		return
 	}
 
-	if x.CurrentWorkInterrupted(){
+	if x.CurrentWorkInterrupted() {
 		reading.Error = errors.New("прервано")
 		return
 	}
 
-	request.Cmd = 3
+	request.ProtocolCommandCode = 3
 	request.Data = append([]byte{0, 6*n + 4, 0, 2})
 
 	bytes, err = port.Fetch(request.Bytes())
@@ -345,5 +336,3 @@ func (x Provider) readPin(port *comport.Port, pin int) (reading Reading) {
 	return
 
 }
-
-

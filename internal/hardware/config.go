@@ -1,22 +1,21 @@
 package hardware
 
 import (
-	"io/ioutil"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"os"
 )
 
 type Config struct {
 	SerialPortName string
 	CheckedPlaces  [10]bool
-	filename string
+	filename       string
 }
-
 
 func loadConfig(filename string) Config {
 
-	r := Config{filename:filename}
+	r := Config{filename: filename}
 	// считать настройки приложения из сохранённого файла json
 	b, err := ioutil.ReadFile(filename)
 	if err == nil {
@@ -30,7 +29,6 @@ func loadConfig(filename string) Config {
 	return r
 }
 
-
 func (x Config) Save() {
 	// сохранить конфиг
 	b, err := json.MarshalIndent(x, "", "    ")
@@ -43,7 +41,7 @@ func (x Config) Save() {
 		fmt.Println("unable to create hardware config file:", err)
 		return
 	}
-	if _,err := file.Write(b); err != nil {
+	if _, err := file.Write(b); err != nil {
 		fmt.Println("unable to write hardware config file:", err)
 		return
 	}
@@ -55,10 +53,9 @@ func defaultConfig() Config {
 	}
 }
 
-
 func (x Config) CheckedPlaceExists() bool {
-	for i:=0; i<10; i++{
-		if x.CheckedPlaces[i]{
+	for i := 0; i < 10; i++ {
+		if x.CheckedPlaces[i] {
 			return true
 		}
 	}

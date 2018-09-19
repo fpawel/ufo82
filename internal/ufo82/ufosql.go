@@ -3,9 +3,7 @@ package ufo82
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
-		)
-
-
+)
 
 type DB struct {
 	Conn *sqlx.DB
@@ -127,12 +125,11 @@ VALUES ($1,$2);`, productID, sensitivity)
 }
 
 func (x DB) ClearProductSensitivities(productID ProductID) {
-	_, err := x.Conn.Exec(`DELETE FROM sensitivities WHERE product_id = $1;`, productID, )
+	_, err := x.Conn.Exec(`DELETE FROM sensitivities WHERE product_id = $1;`, productID)
 	if err != nil {
 		panic(err)
 	}
 }
-
 
 func (x DB) ApplyCurrentProductSerial(inp ProductOrderSerial) string {
 	partyID := x.GetLastPartyID()
@@ -204,7 +201,7 @@ INSERT INTO products (party_id, product_number, order_in_party)  VALUES (last_in
 		}
 	}
 
-	_,products := x.GetPartyByID(x.GetLastPartyID())
+	_, products := x.GetPartyByID(x.GetLastPartyID())
 
 	r, err := x.Conn.Exec(`INSERT INTO parties DEFAULT VALUES; SELECT last_insert_rowid()`)
 	if err != nil {
@@ -215,7 +212,7 @@ INSERT INTO products (party_id, product_number, order_in_party)  VALUES (last_in
 		panic(err)
 	}
 	newPartyID := PartyID(v)
-	for _,p := range products{
+	for _, p := range products {
 		_, err := x.Conn.Exec(`
 INSERT INTO products (party_id, product_number, order_in_party)  
 VALUES ($1, $2, $3);`, newPartyID, p.ProductNumber, p.Order)
